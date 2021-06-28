@@ -6,6 +6,12 @@ const App = () => {
   const [carouselDataState, setCarouselDataState] = useState({});
   // state to hold the current carousel panel index
   const [currentPanelState, setCurrentPanelState] = useState(0);
+  // state to hold all the data (people's names and avatars (images) from two pages )
+  const [listOfPeople, setListOfPeople] = useState([]);
+
+  // it may be possible to combine all states - and replace multiple useState variables with useReducer
+
+  let people = []
 
   useEffect(() => {
     const loadCarouselData = async () => {
@@ -13,24 +19,23 @@ const App = () => {
       // The data is a list of objects that have first_name, last_name, and avatar (image)
       const baseUrl = 'https://reqres.in/api/users?page='
       let page = 1
-      // let people = []
       
-      //do { // trying Pagination with do while loop
-      try {
-        console.log("fetching carousel data")
-        const response = await fetch(`${baseUrl}${page}`)
-        const body = await response.json()
-
-        // people.push.apply(people, body.data); 
-        // page++ 
-        
-        setCarouselDataState(body.data)
-      }
-      catch(error) {
-        console.log("error")
-      }
-    // } while (page <= 2) // hardcoded 2 to try Pagination
+      do { 
+        try {
+          console.log("fetching carousel data")
+          const response = await fetch(`${baseUrl}${page}`)
+          const body = await response.json()
+          people.push.apply(people, body.data)
+          setListOfPeople(people)
+          page++ 
+        }
+        catch(error) {
+          console.log("error")
+        }
+      } while (page <= 2)
     }
+
+    setCarouselDataState(listOfPeople)
 
     const setCurrentPanel = () => {
       // Figure out the next panel index to show. 
@@ -51,9 +56,10 @@ const App = () => {
 
     // update the current carousel panel
     setCurrentPanel()
-  }, 
-  // make sure that useEffect gets fired again when the current panel index changes
-  [ carouselDataState ]) 
+
+    // update the current list of people from both pages
+    setListOfPeople()
+  }, [currentPanelState]) 
   
   // carousel data is loaded asyncronously
   // so check whether the data has been loaded before generating JSX
